@@ -18,6 +18,7 @@ def read_data(data_dir, csv_file):
     df = df.reindex(
         np.random.permutation(df.index))
     print("Overview:")
+    print(df.shape)
     print(df.head(),'\n')
     print('Basic statistical values:\n', df.describe())
     return df
