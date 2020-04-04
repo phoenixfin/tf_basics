@@ -1,0 +1,11 @@
+State,Average of Republicans 2016,Average of Democrats 2016,Difference(Rep-Dem),Average of Poverty.Rate.below.federal.poverty.threshold,Average of Graduate Degree,Average of Median Earnings 2010,Average of Gini.Coefficient,Average of White (Not Latino) Population,Average of School Enrollment,Average of Infant.mortality,Average of Unemployment,Average of median_age,Average of Violent.crime
+Alabama,64,34,31,20,6,23934,0.459,67,74,9.2,0.09,38.9,355
+Arizona,53,42,11,19,7,25055,0.436,53,73,7,0.11,38.2,418
+Arkansas,65,30,34,20,4,22200,0.447,77,74,8.8,0.08,39.8,351
+California,43,50,-7,14,9,29033,0.442,58,76,5.2,0.12,38,409
+Colorado,56,37,19,13,10,26449,0.431,77,74,6,0.08,40.7,201
+Connecticut,44,51,-6,8,14,36546,0.439,80,81,5.5,0.08,39.9,277
+Delaware,47,48,-1,11,10,30926,0.425,69,75,8.1,0.07,39.2,593
+District of Columbia,4,93,-89,18,14,20255,0.535,33,38,12,0.09,34.3,1291
+Florida,64,34,30,17,6,24918,0.442,70,71,8,0.09,41,460
+Grand Total,58,38,20,17,7,25463,0.444,70,74,7.5,0.09,39.5,351
