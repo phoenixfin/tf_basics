@@ -58,7 +58,7 @@ class LinearRegressor(object):
         return features, labels
 
     def analyze_result(self, pred):
-        print('\n==== RESULT ANALYSIS ====')
+        print('\n======= RESULT ANALYSIS =======\n')
         
         # Print Mean Squared Error and Root Mean Squared Error.
         mean_squared_error = metrics.mean_squared_error(pred, self.target)

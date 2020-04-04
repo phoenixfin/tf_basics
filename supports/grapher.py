@@ -10,7 +10,7 @@ def plot_regression(df, x, y, model):
     weight = model.get_variable_value(pos + feat + '/weights')[0]
     bias = model.get_variable_value(pos + 'bias_weights')
 
-    sample = df.sample(n=500)
+    sample = df.sample(n=500, replace = True)
     x_0 = sample[x].min()
     x_1 = sample[x].max()
 
