@@ -1,33 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import pandas as pd
 import tensorflow as tf
-from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 from supports.grapher import plot_the_loss_curve
+from frameworks._general_model import GeneralModel
 
-pd.options.display.max_rows = 10
-pd.options.display.float_format = "{:.1f}".format
+import logging
+logger = tf.get_logger()
+logger.setLevel(logging.ERROR)
 
-class SequentialLayer(object):
+class SequentialLayer(GeneralModel):
     def __init__(self, df):
-        self.model = None
+        super().__init__(df)
         self.train_df, self.test_df = train_test_split(df, test_size=0.2)        
-        self.features = []
-        self.target = None
 
     def build(self, features, target_var, learning_rate):
-        self.features = self.train_df[features]
-        self.target = self.train_df[target_var]
-        
+        super()._build(features, target_var)
+                
         self.model = tf.keras.models.Sequential()
-
-        # Add one linear layer to the model to yield a simple linear regressor.
         self.model.add(tf.keras.layers.Dense(units=1, input_shape=(1,)))
-
-        # Compile the model topography into code that TensorFlow can efficiently
         self.model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=learning_rate),
                     loss="mean_squared_error",
                     metrics=[tf.keras.metrics.RootMeanSquaredError()])
@@ -43,11 +36,8 @@ class SequentialLayer(object):
             validation_split = validation_split
         )
 
-        # The list of epochs is stored separately from the 
-        # rest of history.
         epochs = history.epoch
 
-        # Isolate the root mean squared error for each epoch.
         hist = pd.DataFrame(history.history)
         rmse = hist["root_mean_squared_error"]
 
@@ -60,9 +50,9 @@ class SequentialLayer(object):
         bias = self.model.get_variable_value(pos + 'bias_weights')
         return weight, bias
     
-    def run_model(self, batch_size, epochs_num, validation_split):
+    def run_model(self, validation_split, batch_size, epochs):
         epochs, rmse, history = self.train(
-            epochs_num, batch_size, validation_split
+            epochs, batch_size, validation_split
         )
 
         plot_the_loss_curve(epochs, history["root_mean_squared_error"], 

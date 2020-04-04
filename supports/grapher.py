@@ -5,6 +5,14 @@ Plot functions
 from matplotlib import pyplot as plt
 
 def plot_regression(df, x, y, model):
+    if type(model).__name__ == "LinearRegressorV2":
+        feat = x.replace(' ', '_')
+        pos = 'linear/linear_model/'
+        weight = model.get_variable_value(pos + feat + '/weights')[0]
+        bias = model.get_variable_value(pos + 'bias_weights')
+    else:
+        weight = model.get_weights()[0][0]
+        bias = model.get_weights()[1][0]
     sample = df.sample(n=500, replace = True)
     x_0 = sample[x].min()
     x_1 = sample[x].max()

@@ -1,31 +1,23 @@
 import math
+import logging
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import logging
-
 from sklearn import metrics
-from matplotlib import pyplot as plt
+
+from frameworks._general_model import GeneralModel
 
 tf.keras.backend.set_floatx('float64')
-
 logger = tf.get_logger()
 logger.setLevel(logging.ERROR)
 
-pd.options.display.max_rows = 10
-pd.options.display.float_format = '{:.1f}'.format
-
-class LinearRegressor(object):
-    def __init__(self, dataset):
-        self.model = None
-        self.data = dataset
-        self.features = []
-        self.target = None
+class LinearRegressor(GeneralModel):
+    def __init__(self, df):
+        super().__init__(df)
+        self.train_df = df
     
     def build(self, features, target_var, learning_rate):
-        self.features = self.data[features]
-        self.target = self.data[target_var]
-
+        super()._build(features, target_var)
         optimizer = tf.keras.optimizers.SGD(
             lr=learning_rate, 
             clipvalue = 5.0
@@ -87,6 +79,7 @@ class LinearRegressor(object):
 
         pred = self.model.predict(input_fn = prediction_input_fn)
         return np.array([item['predictions'][0] for item in pred])
+
 
     def run_model(self, steps, batch_size, epochs):
         tr_fn = lambda:self.input_fn(batch_size=batch_size)
