@@ -37,7 +37,7 @@ class LinearRegressor(GeneralModel):
         features = {key:np.array(value) for key,value in dict(self.features).items()}                                           
 
         # Construct a dataset, and configure batching/repeating.
-        ds = tf.python.data.Dataset.from_tensor_slices((features, self.target)) 
+        ds = tf.compat.v1.data.Dataset.from_tensor_slices((features, self.target)) 
         ds = ds.batch(batch_size).repeat(num_epochs)
 
         # Shuffle the data, if specified.
