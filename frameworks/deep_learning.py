@@ -2,7 +2,6 @@
 
 import pandas as pd
 import tensorflow as tf
-from sklearn.model_selection import train_test_split
 
 from supports.grapher import plot_the_loss_curve
 from frameworks._general_model import GeneralModel
@@ -14,7 +13,6 @@ logger.setLevel(logging.ERROR)
 class SequentialLayer(GeneralModel):
     def __init__(self, df):
         super().__init__(df)
-        self.train_df, self.test_df = train_test_split(df, test_size=0.2)        
 
     def build(self, features, target_var, learning_rate):
         super()._build(features, target_var)
@@ -57,3 +55,4 @@ class SequentialLayer(GeneralModel):
 
         plot_the_loss_curve(epochs, history["root_mean_squared_error"], 
                             history["val_root_mean_squared_error"])
+        return history["root_mean_squared_error"]

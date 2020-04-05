@@ -14,7 +14,6 @@ logger.setLevel(logging.ERROR)
 class LinearRegressor(GeneralModel):
     def __init__(self, df):
         super().__init__(df)
-        self.train_df = df
     
     def build(self, features, target_var, learning_rate):
         super()._build(features, target_var)
@@ -58,12 +57,8 @@ class LinearRegressor(GeneralModel):
         print("Mean Squared Error (on training data): %0.3f" % mean_squared_error)
         print("Root Mean Squared Error (on training data): %0.3f" % root_mean_squared_error)
 
-        min_house_value = self.target.min()
-        max_house_value = self.target.max()
-        min_max_difference = max_house_value - min_house_value
+        min_max_difference = self.target.max() - self.target.min()
 
-        print("Min. Target Value: %0.3f" % min_house_value)
-        print("Max. Target Value: %0.3f" % max_house_value)
         print("Difference between Min. and Max.: %0.3f" % min_max_difference)
         print("Root Mean Squared Error: %0.3f" % root_mean_squared_error)
 
@@ -71,7 +66,8 @@ class LinearRegressor(GeneralModel):
         calibration_data["predictions"] = pd.Series(pred)
         calibration_data["targets"] = pd.Series(self.target)
         print(calibration_data.describe())
-        print('\n=============================\n')        
+        print('\n=============================\n')
+        return root_mean_squared_error
 
     def train(self, steps, *fn):
         training_input_fn, prediction_input_fn = fn
@@ -80,11 +76,10 @@ class LinearRegressor(GeneralModel):
         pred = self.model.predict(input_fn = prediction_input_fn)
         return np.array([item['predictions'][0] for item in pred])
 
-
     def run_model(self, steps, batch_size, epochs):
         tr_fn = lambda:self.input_fn(batch_size=batch_size)
         pr_fn = lambda:self.input_fn(num_epochs=epochs, shuffle=False)
 
         predictions = self.train(steps, tr_fn, pr_fn)
-        self.analyze_result(predictions)
-        return predictions
+        error = self.analyze_result(predictions)
+        return error

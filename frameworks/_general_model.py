@@ -1,7 +1,7 @@
 class GeneralModel(object):
     def __init__(self, df):
         self.model = None
-        self.train_df = None
+        self.train_df = df
         self.features = []
         self.target = None
         
