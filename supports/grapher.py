@@ -13,6 +13,8 @@ def plot_regression(df, x, y, model):
     else:
         weight = model.get_weights()[0][0]
         bias = model.get_weights()[1][0]
+        
+    print(weight, bias)
     sample = df.sample(n=500, replace = True)
     x_0 = sample[x].min()
     x_1 = sample[x].max()

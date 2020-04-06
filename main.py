@@ -96,10 +96,16 @@ if __name__ == "__main__":
         
     var = 'batch_size'
     # iterate_main(dataset, var, default_range[var], 'Linear Regressor')
+    # print(dataset.columns)
     
+    features = ['GDP per capita', 'Social support', 
+                'Healthy life expectancy', 'Freedom to make life choices', 
+                'Generosity', 'Perceptions of corruption']
+        
+    # for feat in features:
     main(
         df = dataset,
-        features = ['GDP per capita'],
+        features = ['Perceptions of corruption'],
         target = 'Score',
         tool = 'Linear Regressor',
         learning_rate = 0.01, 
@@ -109,4 +115,3 @@ if __name__ == "__main__":
         validation_split = 0.3,
         plot = True
     )
-    
