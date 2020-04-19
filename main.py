@@ -1,7 +1,7 @@
 import time
 import numpy as np
 
-from supports import reader, grapher
+from supports import file_manager, data_manager, graph_manager
 from frameworks import regression, deep_learning
 
 
@@ -29,7 +29,7 @@ def main(df, features, target, tool, learning_rate = 0.01, steps_num = 100,
     )
 
     if plot:
-        grapher.plot_regression(df, features[0], target, model.model)
+        graph_manager.plot_regression(df, features[0], target, model.model)
         
     elapsed = round(time.time()-start, 3)
     print("Elapsed time:", elapsed, "seconds")    
@@ -81,8 +81,7 @@ def iterate_main(df, var, iteration, tool):
     fig.tight_layout()  
     plt.show()
     
-    
-if __name__ == "__main__":
+def world_happiness():
     default_range = {
         'learning_rate': np.arange(0.0001,0.01,0.0005),
         'steps_num': np.arange(50,1000,50),
@@ -90,8 +89,8 @@ if __name__ == "__main__":
     }
     
     from matplotlib import pyplot as plt
-    dataset1 = reader.read_data('world-happiness', '2019.csv')
-    dataset2 = reader.read_data('world-happiness', '2018.csv')
+    dataset1 = file_manager.read_data('world-happiness', '2019.csv')
+    dataset2 = file_manager.read_data('world-happiness', '2018.csv')
     dataset = dataset1 + dataset2
         
     var = 'batch_size'
@@ -115,3 +114,69 @@ if __name__ == "__main__":
         validation_split = 0.3,
         plot = True
     )
+
+if __name__ == "__main__":
+    # world_happiness()
+    dataset = file_manager.read_data('world-happiness', '2018.csv')
+    norm = data_manager.DataNormalizer(dataset)
+
+    """ Part 1: Missing data imputation """    
+    for feature in dataset.columns[2:]:
+        norm.change_feature(feature)
+        norm.data_filler('median', fillzero = True)
+        
+    """ Part 2: Grouping countries """    
+    dataset2 = file_manager.read_data('world-countries-and-continents-details','countries and continents.csv')
+    continent_dict = {}
+    continents = dataset2['Continent'].unique()
+    for continent in continents:
+        countries = dataset2[dataset2['Continent']==continent]['name'].tolist()
+        continent_dict[continent] = countries
+    norm.change_feature('Country or region')
+    norm.bucketing(continent_dict, continents, 'Continent')
+    print(norm.df)
+
+    """ Part 3: One Hot Encoding Continents """
+    norm.change_feature('Continent')
+    norm.one_hot_encoding()
+    print(norm.df)
+    
+    """ Part 4: Binning GDP """
+    norm.change_feature("GDP per capita")
+    GDP_Labels = ['Low Income', 'Lower-Middle Income', 
+                  'Upper-middle Income', 'High Income']
+    norm.binning('value', bins=4, labels=GDP_Labels)
+    print(norm.df)
+    
+    """ Part 5: One Hot Encoding GDP Bins """
+    norm.change_feature("GDP per capita bin")
+    norm.one_hot_encoding()
+    print(norm.df)
+    
+    """ Part 6: Range Scaling Score """
+    norm.change_feature("Score")
+    norm.normalize("range scaling")
+    print(norm.df)
+    
+    """ Part 7: Clipping Generosity  """
+    norm.change_feature("Generosity")
+    upper, lower, _ = norm.get_outlier('standard deviation',3)
+    norm.normalize("clipping", lower, upper)
+    print(norm.df)
+    
+    """ Part 8: Log-Scale Perception of Corruption """
+    norm.change_feature("Perceptions of corruption")
+    norm.normalize("log scaling")
+    
+    file_manager.write_data(norm.df)
+    
+    # for feature in dataset.columns[2:]:
+    #     print(feature)
+    #     norm.change_feature(feature)
+    #     print(norm.get_outlier('standard deviation',3))
+    #     print()     
+
+    # # norm.normalize('Z value scaling')
+    # print(norm.binning('quantile'))
+    # # print(norm.df['Score'])
+    # print(norm.df['Score'].hist())
