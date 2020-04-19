@@ -23,6 +23,9 @@ def read_data(data_dir, csv_file):
     print('Basic statistical values:\n', df.describe())
     return df
 
+def write_data(dataframe, file_name):
+    dataframe.to_csv("output/"+file_name+".csv", index = False)
+
 if __name__ == "__main__":
     # example
     print(get_datasets_list())

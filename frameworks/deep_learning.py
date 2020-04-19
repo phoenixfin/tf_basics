@@ -3,7 +3,7 @@
 import pandas as pd
 import tensorflow as tf
 
-from supports.grapher import plot_the_loss_curve
+from supports.graph_manager import plot_the_loss_curve
 from frameworks._general_model import GeneralModel
 
 import logging

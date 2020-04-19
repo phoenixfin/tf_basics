@@ -50,14 +50,13 @@ class DataNormalizer(object):
             ds = drange/bins
             grids = np.arange(dmin, dmax+ds, ds)
         if not labels: labels = [method+'_bin_'+str(j) for j in range(bins)]
-        self.df[feature+' bin'] = pd.cut(self.data, bins=grids, labels=labels)
+        self.df[self.feature+' bin'] = pd.cut(self.data, bins=grids, labels=labels)
 
     def bucketing(self, vocab, labels, group=None):
         self._general_transform('bucketing')
         condition = [[k in vocab[label] for k in self.data] for label in labels]
         if group is None:
             group = self.feature + ' grouping'
-        self.df.pop(self.feature)            
         self.df[group] = np.select(condition, labels, default='Other')
     
     def one_hot_encoding(self):
@@ -69,12 +68,12 @@ class DataNormalizer(object):
     def get_outlier(self, method, factor):
         if method == 'standard deviation':
             mean, std = self.get_mean_std()
-            upper_lim = mean + dev * factor
-            lower_lim = mean - dev * factor
+            upper_lim = mean + std * factor
+            lower_lim = mean - std * factor
         elif method == 'quantile':
             upper_lim = self.data.quantile(1-factor)
             lower_lim = self.data.quantile(factor)
-        outliers = data[(self.data < upper_lim) & (self.data > lower_lim)]
+        outliers = self.data[(self.data > upper_lim) | (self.data < lower_lim)]
         return upper_lim, lower_lim, outliers
 
     def data_filler(self, method, fillzero = False):
@@ -86,27 +85,26 @@ class DataNormalizer(object):
             'mode' : self.data.mode()
         }
         self.data = self.data.fillna(fill_value[method])
+        if fillzero:
+            self.data = self.data.replace(0, fill_value[method])
 
-    def normalize(self, method, *args):
+    def normalize(self, method, *args):        
         method_name = method.replace(' ','_').lower()
+        self._general_transform(method_name)              
         self.data = getattr(self, '_'+method_name)(*args)
         
     def _range_scaling(self, lower=0, upper=1):
-        self._general_transform('range_scaling')        
         dmax, dmin, drange = self.get_range()
         scaled_range = upper-lower
-        return lower + ((self.data-dmin)/old_range)*scaled_range        
+        return lower + ((self.data-dmin)/drange)*scaled_range        
 
     def _clipping(self, lower=None, upper=None):
-        self._general_transform('clipping')        
         return self.data.clip(lower, upper)
         
     def _log_scaling(self, base = np.e):
-        self._general_transform('log_scaling')        
         return np.log(self.data+1)/np.log(base)
     
     def _z_value_scaling(self):
-        self._general_transform('z_value_scaling')        
         mean, std = self.get_mean_std()
         return (self.data - mean)/(std+0.000001)
     
