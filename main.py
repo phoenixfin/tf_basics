@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     """ Part 3: One Hot Encoding Continents """
     norm.change_feature('Continent')
-    norm.one_hot_encoding()
+    norm.one_hot_encoding(remove_original = False)
     print(norm.df)
     
     """ Part 4: Binning GDP """
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     
     """ Part 5: One Hot Encoding GDP Bins """
     norm.change_feature("GDP per capita bin")
-    norm.one_hot_encoding()
+    norm.one_hot_encoding(remove_original = False)
     print(norm.df)
     
     """ Part 6: Range Scaling Score """
@@ -160,16 +160,15 @@ if __name__ == "__main__":
     
     """ Part 7: Clipping Generosity  """
     norm.change_feature("Generosity")
-    upper, lower, _ = norm.get_outlier('standard deviation',3)
-    norm.normalize("clipping", lower, upper)
+    norm.normalize("clipping", 0, 0.39)
     print(norm.df)
     
     """ Part 8: Log-Scale Perception of Corruption """
     norm.change_feature("Perceptions of corruption")
     norm.normalize("log scaling")
     
-    file_manager.write_data(norm.df)
-    
+    file_manager.write_data(norm.df, "2018_scaled")
+    print(norm.df.describe())
     # for feature in dataset.columns[2:]:
     #     print(feature)
     #     norm.change_feature(feature)

@@ -59,10 +59,10 @@ class DataNormalizer(object):
             group = self.feature + ' grouping'
         self.df[group] = np.select(condition, labels, default='Other')
     
-    def one_hot_encoding(self):
+    def one_hot_encoding(self, remove_original=True):
         self._general_transform('one_hot_encoding')        
         categorized = pd.get_dummies(self.data)
-        self.df.pop(self.feature)
+        if remove_original: self.df.pop(self.feature)
         self.df = pd.concat((self.df, categorized), axis=1)        
 
     def get_outlier(self, method, factor):
