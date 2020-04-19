@@ -1,50 +1,90 @@
+import pandas as pd
 import numpy as np
 
 class DataNormalizer(object):
-    def __init__(self, dataframe):
+    def __init__(self, dataframe, feature=None):
         self.df = dataframe
+        if feature == None: feature = self.df.columns[0]
+        self.feature = feature
 
-    def get_outlier(self, feature, method, factor):
+    @property
+    def data(self):
+        return self.df[self.feature]
+
+    @data.setter
+    def data(self, value):
+        self.df[self.feature] = value
+
+    def change_feature(self, new_feature):
+        self.feature = new_feature
+
+    def get_mean_std(self):
+        return self.data.mean(), self.data.std()
+    
+    def get_range(self):
+        dmax = float(self.data.max())
+        dmin = float(self.data.min())
+        return dmax, dmin, dmax-dmin
+
+    def binning(self, method, bins=10, labels=[]):
+        if method == 'quantile':
+            ds = 1./bins
+            grids = [self.data.quantile(ds*i) for i in range(bins+1)]
+        elif method == 'value':
+            dmax, dmin, drange = self.get_range()
+            ds = drange/bins
+            grids = np.arange(dmin, dmax+ds, ds)
+        if not labels: labels = [method+'_bin_'+str(j) for j in range(bins)]
+        return pd.cut(self.data, bins=grids, labels=labels)
+
+    def bucketing(self, vocab, labels, group=None):
+        condition = [[k in vocab[label] for k in self.data] for label in labels]
+        if group is None:
+            group = self.feature + ' grouping'
+        self.df[group] = np.select(condition, labels, default='Other')
+    
+    def one_hot_encoding(self):
+        categorized = pd.get_dummies(self.data)
+        self.df.pop(self.feature)
+        self.df = pd.concat((self.df, categorized), axis=1)        
+
+    def get_outlier(self, method, factor):
         if method == 'standard deviation':
-            upper_lim = self.df[feature].mean() + self.df[feature].std() * factor
-            lower_lim = self.df[feature].mean() - self.df[feature].std() * factor
+            mean, std = self.get_mean_std()
+            upper_lim = mean + dev * factor
+            lower_lim = mean - dev * factor
         elif method == 'quantile':
-            upper_lim = self.df[feature].quantile(1-factor)
-            lower_lim = self.df[feature].quantile(factor)
-        outliers = data[(self.df[feature] < upper_lim) & (self.df[feature] > lower_lim)]
+            upper_lim = self.data.quantile(1-factor)
+            lower_lim = self.data.quantile(factor)
+        outliers = data[(self.data < upper_lim) & (self.data > lower_lim)]
         return upper_lim, lower_lim, outliers
 
-    def remove_nan(self, feature, method):
-        data = self.df[feature]
+    def data_filler(self, method, fillzero = False):
         fill_value = {
             'zero' : 0,
-            'median' : data.median(),
-            'mean' : data.mean(),
-            'mode' : data.mode()
+            'median' : self.data.median(),
+            'mean' : self.data.mean(),
+            'mode' : self.data.mode()
         }
-        self.df[feature] = data.fillna(fill_value[method])
+        self.data = self.data.fillna(fill_value[method])
 
-    def normalize(self, feature, method, *args):
-        data = self.df[feature]
+    def normalize(self, method, *args):
         method_name = method.replace(' ','_').lower()
-        result = getattr(self, '_'+method_name)(data, *args)
-        self.df[feature] = result
+        self.data = getattr(self, '_'+method_name)(*args)
         
-    def _range_scaling(self, data, lower=0, upper=1):
-        dmax = np.max(data)
-        dmin = np.min(data)
-        old_range = dmax-dmin
+    def _range_scaling(self, lower=0, upper=1):
+        dmax, dmin, drange = self.get_range()
         scaled_range = upper-lower
-        return lower + ((data-dmin)/old_range)*scaled_range        
+        return lower + ((self.data-dmin)/old_range)*scaled_range        
 
-    def _clipping(self, data, lower=None, upper=None):
-        return data.clip(lower, upper)
+    def _clipping(self, lower=None, upper=None):
+        return self.data.clip(lower, upper)
         
-    def _log_scaling(self, data, base = np.e):
-        return np.log(data+1)/np.log(base)
+    def _log_scaling(self, base = np.e):
+        return np.log(self.data+1)/np.log(base)
     
-    def _zvalue_scaling(self, data):
-        return (data - data.mean())/(data.std()+0.000001)
-    
+    def _z_value_scaling(self):
+        mean, std = self.get_mean_std()
+        return (self.data - mean)/(std+0.000001)
     
     
